@@ -11,7 +11,7 @@ public class TropicalElGamalEncryption
         // Public parameters:
         final double primeNum = 29.0;
         System.out.println("Public prime number P: " + primeNum);
-        final RealMatrix publicMatrixG = MatrixUtils.createRealMatrix(new double[][]{{1.0, 2.0}, {4.0, 7.0}});
+        final RealMatrix publicMatrixG = MatrixUtils.createRealMatrix(new double[][]{{51.0, 93.0}, {41.0, 79.0}});
         System.out.println("Public matrix G:");
         printMatrix(publicMatrixG);
 
