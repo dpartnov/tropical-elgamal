@@ -53,7 +53,8 @@ public class TropicalElGamalEncryption
 
         // Bob change private key matrix to diagonal matrix
         final RealMatrix diagonalMatrixS = Utils.convertToDiagonalMatrix(bobPrivateKey);
-        System.out.println("Diagonal matrix S:");
+        System.out.println("Bob diagonal matrix S:");
+        Utils.printMatrix(diagonalMatrixS);
         Utils.printMatrix(diagonalMatrixS);
 
 
@@ -76,7 +77,7 @@ public class TropicalElGamalEncryption
         // 4. Decryption
         // Alice computes private key for decryption K = V^x mod p
         final RealMatrix alicePrivateKey = Utils.modulo(bobPublicKey.power(x), publicPrimeNumber);
-        System.out.println("Alice private key = V^x mod p:");
+        System.out.println("Alice private key K = V^x mod p:");
         Utils.printMatrix(alicePrivateKey);
 
         // Alice transform private key into diagonal matrix
