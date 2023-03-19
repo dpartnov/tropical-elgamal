@@ -19,13 +19,16 @@ public class Utils {
         return result;
     }
 
-    public static RealMatrix convertToDiagonalMatrix(final RealMatrix matrix) {
-        int dimension = matrix.getRowDimension();
-        final RealMatrix result = matrix.copy();
-        for (int i = 0; i < dimension; i++) {
-            result.setEntry(i, i, Double.NEGATIVE_INFINITY);
+    public static RealMatrix convertToDiagonalMatrix(RealMatrix matrix) {
+        int numRows = matrix.getRowDimension();
+        int numCols = matrix.getColumnDimension();
+        int diagonalLength = Math.min(numRows, numCols);
+
+        for (int i = 0; i < diagonalLength; i++) {
+            matrix.setEntry(numRows - i - 1, i, Double.NEGATIVE_INFINITY);
         }
-        return result;
+
+        return matrix;
     }
 
     public static RealMatrix addWithDiagonalMatrix(RealMatrix realMatrix, RealMatrix diagonalMatrix) {
@@ -38,7 +41,7 @@ public class Utils {
             for (int j = 0; j < cols; j++) {
                 double val1 = realMatrix.getEntry(i, j);
                 double val2 = diagonalMatrixCopy.getEntry(i, j);
-                if (Double.isInfinite(val2) && j == i) {
+                if (Double.isInfinite(val2)) {
                     diagonalMatrixCopy.setEntry(i, j, 0);
                     double colSum = 0;
                     for (int k = 0; k < rows; k++) {
@@ -63,7 +66,7 @@ public class Utils {
             for (int j = 0; j < cols; j++) {
                 double val1 = realMatrix.getEntry(i, j);
                 double val2 = diagonalMatrixCopy.getEntry(i, j);
-                if (Double.isInfinite(val2) && j == i) {
+                if (Double.isInfinite(val2)) {
                     diagonalMatrixCopy.setEntry(i, j, 0);
                     double colSum = 0;
                     for (int k = 0; k < rows; k++) {

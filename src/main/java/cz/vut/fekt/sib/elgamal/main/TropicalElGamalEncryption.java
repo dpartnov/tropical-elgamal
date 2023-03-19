@@ -4,11 +4,7 @@ import cz.vut.fekt.sib.elgamal.utils.Utils;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
-
-import static cz.vut.fekt.sib.elgamal.utils.Utils.splitStringToMatrices;
 
 
 public class TropicalElGamalEncryption
