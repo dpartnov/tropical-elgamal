@@ -4,6 +4,10 @@ import cz.vut.fekt.sib.elgamal.utils.Utils;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
 import static cz.vut.fekt.sib.elgamal.utils.Utils.splitStringToMatrices;
 
 
@@ -11,83 +15,87 @@ public class TropicalElGamalEncryption
 {
     public static void main( String[] args ) {
 
-        // Public parameters:
-        final int primeNum = 29;
-        System.out.println("Public prime number P: " + primeNum);
-        final RealMatrix publicMatrixG = MatrixUtils.createRealMatrix(new double[][]{{51.0, 93.0}, {41.0, 79.0}});
+        // Public parameters
+        final int publicPrimeNumber = 29;
+        System.out.println("Public prime number p: " + publicPrimeNumber);
+        final RealMatrix publicMatrix = MatrixUtils.createRealMatrix(new double[][]{{51.0, 93.0}, {41.0, 79.0}});
         System.out.println("Public matrix G:");
-        Utils.printMatrix(publicMatrixG);
+        Utils.printMatrix(publicMatrix);
 
-        // message:
-        //final RealMatrix m = MatrixUtils.createRealMatrix(new double[][]{{65.0, 47.0}, {28.0, 72.0}});
+        // message
         final String text = "Eve wants to kill you";
-        System.out.println("Plain text: Eve want to kill you");
-        final RealMatrix[] messages = splitStringToMatrices(text);
+        System.out.println("Plain text: " + text + "\n");
+        final LinkedList<RealMatrix> messages = Utils.splitStringToMatrices(text);
 
-        // 1. Alice ( Key generation ):
-        //Alice chooses a random integer x
+
+
+
+        // 1. Alice - Key generation
+        // Alice chooses a random integer x
         final int x = 6;
-        // Alice computes U = G⊗x mod p and sends it to Bob.
-        final RealMatrix afterPower = publicMatrixG.power(x);
-        final RealMatrix alicePublicKey = Utils.modulo(afterPower, primeNum);
-        System.out.println("Alice public key U = G⊗x mod p:");
+        // Alice computes public key U = G^x mod p and sends it to Bob.
+        final RealMatrix alicePublicKey = Utils.modulo(publicMatrix.power(x), publicPrimeNumber);
+        System.out.println("Alice public key (U):");
         Utils.printMatrix(alicePublicKey);
 
-        // 2. Encryption
+
+
+
+        // 2. Bob - Key generation
+        // Bob chooses a random integer y
         final int y = 2;
-        // Bob computes KB = U⊗y
-        final RealMatrix bobMatrixK = Utils.modulo(alicePublicKey.power(y), primeNum);
-        System.out.println("Bob matrix KB = U⊗y mod p ( Private key ):");
-        Utils.printMatrix(bobMatrixK);
 
-
-        // Bob's public key:
-        final RealMatrix bobPublicKey = Utils.modulo(publicMatrixG.power(y), primeNum);
-        System.out.println("Bob public key matrix:");
+        // Bob computes public key V
+        final RealMatrix bobPublicKey = Utils.modulo(publicMatrix.power(y), publicPrimeNumber);
+        System.out.println("Bob public key (V):");
         Utils.printMatrix(bobPublicKey);
 
-        final RealMatrix diagonalMatrixS = Utils.convertToDiagonalMatrix(bobMatrixK);
+        // Bob computes private key K = U^y
+        final RealMatrix bobPrivateKey = Utils.modulo(alicePublicKey.power(y), publicPrimeNumber);
+        System.out.println("Bob private key K = U^y mod p:");
+        Utils.printMatrix(bobPrivateKey);
+
+        // Bob change private key matrix to diagonal matrix
+        final RealMatrix diagonalMatrixS = Utils.convertToDiagonalMatrix(bobPrivateKey);
         System.out.println("Diagonal matrix S:");
         Utils.printMatrix(diagonalMatrixS);
 
-        final RealMatrix[] cipherMessages = new RealMatrix[messages.length];
-        int index = 0;
-        for (RealMatrix m : messages) {
-            cipherMessages[index] = Utils.addWithDiagonalMatrix(m, diagonalMatrixS);
-            index++;
-        }
-
-        System.out.println("Cipher matrices:");
-        for (RealMatrix matrix : cipherMessages) {
-            Utils.printMatrix(matrix);
-        }
-
-        System.out.println("Encrypted text: " + Utils.convertToText(cipherMessages));
 
 
-        // Decryption
-        // Alice then computes KA = V⊗x mod p:
-        final RealMatrix alicePrivateKey = Utils.modulo(bobPublicKey.power(x), primeNum);
-        System.out.println("Alice private key = V⊗x mod p:");
+
+        // 3. Encryption - Bob wants to send message
+        final LinkedList<RealMatrix> encryptedMessages = new LinkedList<>();
+        messages.stream().forEachOrdered(message -> {
+            // Bob computes c = m + S for all messages
+            encryptedMessages.add(Utils.addWithDiagonalMatrix(message, diagonalMatrixS));
+        });
+
+        System.out.println("Encrypted matrices:");
+        encryptedMessages.stream().forEachOrdered(Utils::printMatrix);
+        System.out.println("Encrypted text: " + Utils.convertToText(encryptedMessages));
+
+
+
+
+        // 4. Decryption
+        // Alice computes private key for decryption K = V^x mod p
+        final RealMatrix alicePrivateKey = Utils.modulo(bobPublicKey.power(x), publicPrimeNumber);
+        System.out.println("Alice private key = V^x mod p:");
         Utils.printMatrix(alicePrivateKey);
 
-        // Alice transform S into diagonal matrix
+        // Alice transform private key into diagonal matrix
         final RealMatrix aliceDiagonalMatrixS = Utils.convertToDiagonalMatrix(alicePrivateKey);
         System.out.println("Alice diagonal matrix S:");
         Utils.printMatrix(aliceDiagonalMatrixS);
 
+        // Alice decrypts the cipher matrices: m = c - S and then reveal the message from Bob
+        final LinkedList<RealMatrix> decryptedMatrices = new LinkedList<>();
+        encryptedMessages.stream().forEachOrdered(cipherMatrix -> {
+            decryptedMatrices.add(Utils.minusWithDiagonalMatrix(cipherMatrix, aliceDiagonalMatrixS));
+        });
+
         System.out.println("Decrypted matrices:");
-        int index2 = 0;
-        final RealMatrix[] decryptedMessages = new RealMatrix[cipherMessages.length];
-        // Alice decrypts the cipher text:
-        for (RealMatrix matrix : cipherMessages) {
-            final RealMatrix decryptedMatrix = Utils.minusWithDiagonalMatrix(matrix, aliceDiagonalMatrixS);
-            decryptedMessages[index2] = decryptedMatrix;
-            Utils.printMatrix(decryptedMatrix);
-            index2++;
-        }
-
-        System.out.println("Decrypted text: " + Utils.convertToText(decryptedMessages));
-
+        decryptedMatrices.stream().forEachOrdered(Utils::printMatrix);
+        System.out.println("Decrypted text: " + Utils.convertToText(decryptedMatrices));
     }
 }

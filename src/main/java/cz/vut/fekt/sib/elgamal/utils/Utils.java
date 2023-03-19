@@ -2,6 +2,8 @@ package cz.vut.fekt.sib.elgamal.utils;
 
 import org.apache.commons.math3.linear.RealMatrix;
 
+import java.util.LinkedList;
+
 public class Utils {
 
     public static RealMatrix modulo(final RealMatrix matrix, int modValue) {
@@ -76,9 +78,9 @@ public class Utils {
         return result;
     }
 
-    public static RealMatrix[] splitStringToMatrices(String input) {
+    public static LinkedList<RealMatrix> splitStringToMatrices(String input) {
         int numBlocks = (int) Math.ceil(input.length() / 4.0);
-        RealMatrix[] matrices = new RealMatrix[numBlocks];
+        LinkedList<RealMatrix> matrices = new LinkedList<>();
 
         // Pad the input string with spaces to ensure its length is a multiple of 4
         input = String.format("%-" + (numBlocks * 4) + "s", input);
@@ -97,13 +99,12 @@ public class Utils {
                 }
             }
 
-            matrices[i] = matrix;
+            matrices.add(matrix);
         }
-
         return matrices;
     }
 
-    public static String convertToText(RealMatrix[] matrices) {
+    public static String convertToText(LinkedList<RealMatrix> matrices) {
         String result = "";
 
         for (RealMatrix matrix : matrices) {
@@ -126,6 +127,6 @@ public class Utils {
             }
             System.out.println();
         }
-        System.out.println("\n");
+        System.out.println();
     }
 }
