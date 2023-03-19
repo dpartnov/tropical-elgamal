@@ -9,7 +9,7 @@ public class TropicalElGamalEncryption
     public static void main( String[] args ) {
 
         // Public parameters:
-        final double primeNum = 29.0;
+        final int primeNum = 29;
         System.out.println("Public prime number P: " + primeNum);
         final RealMatrix publicMatrixG = MatrixUtils.createRealMatrix(new double[][]{{51.0, 93.0}, {41.0, 79.0}});
         System.out.println("Public matrix G:");
@@ -17,17 +17,17 @@ public class TropicalElGamalEncryption
 
         // 1. Alice ( Key generation ):
         //Alice chooses a random integer x
-        final double x = 6.0;
+        final int x = 6;
         // Alice computes U = G⊗x mod p and sends it to Bob.
-        final RealMatrix afterPower = publicMatrixG.power((int) x);
-        final RealMatrix aliceMatrixU = modulo(afterPower, (int) primeNum);
+        final RealMatrix afterPower = publicMatrixG.power(x);
+        final RealMatrix aliceMatrixU = modulo(afterPower, primeNum);
         System.out.println("Alice matrix U = G⊗x mod p:");
         printMatrix(aliceMatrixU);
 
         // 2. Encryption
-        final double y = 2;
+        final int y = 2;
         // Bob computes KB = U⊗y
-        final RealMatrix bobMatrixK = modulo(aliceMatrixU.power((int) y), (int) primeNum);
+        final RealMatrix bobMatrixK = modulo(aliceMatrixU.power(y), primeNum);
         System.out.println("Bob matrix KB = U⊗y mod p ( Private key ):");
         printMatrix(bobMatrixK);
 
@@ -37,7 +37,7 @@ public class TropicalElGamalEncryption
         printMatrix(m);
 
         // Bob's public key:
-        final RealMatrix bobPublicKeyV = modulo(publicMatrixG.power((int) y), (int) primeNum);
+        final RealMatrix bobPublicKeyV = modulo(publicMatrixG.power(y), primeNum);
         System.out.println("Bob public key matrix:");
         printMatrix(bobPublicKeyV);
 
@@ -52,7 +52,7 @@ public class TropicalElGamalEncryption
 
         // Decryption
         // Alice then computes KA = V⊗x mod p:
-        final RealMatrix alicePrivateKey = modulo(bobPublicKeyV.power((int) x), (int) primeNum);
+        final RealMatrix alicePrivateKey = modulo(bobPublicKeyV.power(x), primeNum);
         System.out.println("Alice private key = V⊗x mod p:");
         printMatrix(alicePrivateKey);
 
